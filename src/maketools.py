@@ -17,7 +17,7 @@ def make_tools(llm: BaseLanguageModel, api_keys: dict = {}, verbose=False):
 
     return [ 
         defaultTool(llm), 
-        semanticSearch(llm), 
+        #semanticSearch(llm), 
         recoverPassword(llm), 
         getAgenda(llm),
     ]
