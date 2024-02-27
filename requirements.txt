@@ -195,4 +195,3 @@ wrapt
 xxhash
 yarl
 zipp
-dotenv
