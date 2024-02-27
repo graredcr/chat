@@ -4,12 +4,17 @@ import time
 import requests 
 import os
 from datetime import date
+
+ 
 from src.agents.lya2Agent import lya2Agent
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_community.callbacks import StreamlitCallbackHandler
 
 
 
+os.environ['OPENAI_API_KEY']            = st.secrets["OPENAI_API_KEY"] 
+os.environ['HUGGINGFACEHUB_API_TOKEN']  = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
+token                                   = st.secrets["token"]
 
 def getAuthInfo( token): 
     url = 'https://dev2.lya2.com/lya2git/index01.php?pag=93&rest=true'
