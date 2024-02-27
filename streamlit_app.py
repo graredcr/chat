@@ -12,12 +12,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_community.callbacks import StreamlitCallbackHandler
 
 
-
-os.environ['OPENAI_API_KEY'] = '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' 
-os.environ['HUGGINGFACEHUB_API_TOKEN'] = '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'
-
-token = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvZGV2Mi5seWEyLmNvbSIsImF1ZCI6Imh0dHBzOlwvXC9kZXYyLmx5YTIuY29tIiwiaWF0IjoxNzA4OTYxMjcyLCJleHAiOjMyODU3NjEyNzIsImRhdGEiOnsidWlkIjoiMzc2IiwiYmQiOiJlbXByZXNhIiwiaWRfY2VudHJvIjoiMiIsInVzdWFyaW8iOiJhZGFsaWEiLCJpZF9iZGQiOiIxIiwiYWNjZXNvIjoiMSIsInpvbmEiOm51bGwsInV1aWQiOiIifX0.OIdg4pDIs88UtP5fl-bgmg2DxD2UwI5kEoxmjysvbbo'
-
+ 
 
 def getAuthInfo( token): 
     url = 'https://dev2.lya2.com/lya2git/index01.php?pag=93&rest=true'
