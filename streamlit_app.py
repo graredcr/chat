@@ -14,7 +14,7 @@ from langchain_community.callbacks import StreamlitCallbackHandler
 
 os.environ['OPENAI_API_KEY']            = st.secrets["OPENAI_API_KEY"] 
 os.environ['HUGGINGFACEHUB_API_TOKEN']  = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
-token                                   = st.secrets["token"]
+token                                   = st.secrets["TOKEN"]
 
 def getAuthInfo( token): 
     url = 'https://dev2.lya2.com/lya2git/index01.php?pag=93&rest=true'
