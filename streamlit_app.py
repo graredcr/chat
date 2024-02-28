@@ -3,6 +3,7 @@ import random
 import time
 import requests 
 import os
+import shutil
 from datetime import date
 
  
@@ -12,9 +13,39 @@ from langchain_community.callbacks import StreamlitCallbackHandler
 
 
 
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import  CharacterTextSplitter
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_community.vectorstores import FAISS
+
+
+
+
+
 os.environ['OPENAI_API_KEY']            = st.secrets["OPENAI_API_KEY"] 
 os.environ['HUGGINGFACEHUB_API_TOKEN']  = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
 token                                   = st.secrets["TOKEN"]
+
+def createBdd():
+    if os.path.isdir('./vectorBDD'):
+        shutil.rmtree('./vectorBDD')
+
+    loader          = PyPDFLoader("./data/manual_usuario.pdf")
+    documents       = loader.load()
+
+    # split it into chunks
+    text_splitter = CharacterTextSplitter(chunk_size=5500, chunk_overlap=200)
+    docs = text_splitter.split_documents(documents)
+
+    embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2") 
+
+    #db = FAISS.from_documents(docs, embedding_function, persist_directory = persist_directory)
+    faiss = FAISS.from_documents(docs, embedding_function)
+
+    faiss.save_local("./vectorBDD", "manual_usuario")
+
+
 
 def getAuthInfo( token): 
     url = 'https://dev2.lya2.com/lya2git/index01.php?pag=93&rest=true'
@@ -25,7 +56,10 @@ def getAuthInfo( token):
         today   = date.today()
         d1      = today.strftime("%d/%m/%Y")
 
+        name = data['data']['0']['nombre']+" "+data['data']['0']['apellidos'];
+
         context=[]
+        context.append("Nombre del usuario  es "+name) 
         context.append("Fecha, hoy es dia "+d1) 
         context.append("Email "+data['data']['0']['email'])
         context.append("Nivel de acceso "+data['data']['0']['acceso'] )
@@ -34,41 +68,42 @@ def getAuthInfo( token):
         context.append("Identificador de sylbo "+data['data']['0']['id_sylbo'] )
         
         
-        name = data['data']['0']['nombre']+" "+data['data']['0']['apellidos'];
+       
         
         return [context, name] 
      
     return false
-
-chat_history = []  
+  
 def initHistory(token):
 
     #get info for context and name
-    [context, name] = getAuthInfo(token)
+    [context, name] = getAuthInfo(token) 
 
-    #CHAT history
-    chat_history = []  
-    chat_history.extend(
-                [
-                    HumanMessage('Me llamo '+name),
-                    AIMessage('Hola como estas'),
-                ]
-            ) 
-
-    return [context, name, chat_history ]
+    return [context, name]
 
 
-[context, name, chat_history] = initHistory(token)
+[context, name] = initHistory(token)
+
+#CHAT history
+chat_history = []  
+chat_history.extend(
+    [
+        HumanMessage('Me llamo '+name),
+        AIMessage('Hola como estas'),
+    ]
+) 
 
 st_callback = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
 agent = lya2Agent(  
     temp=0.0,
     context = context,
-    token=token,
+    token = token,
     #callbacks = [st_callback],
     stream=False
 ).agent_executor
 
+
+createBdd()
 
 st.title("Lya2 chat")
 
@@ -122,6 +157,8 @@ if prompt := st.chat_input("What is up?"):
     #st.markdown(response["output"])
     
     #stream          = st.write_stream(response["output"] )
+
+
 
     
  

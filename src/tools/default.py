@@ -28,12 +28,14 @@ class SearchInput(BaseModel):
 
 class getAgenda(BaseTool):
     name = "getAgenda"
-    description = "Información sobre mi agenda, mi calendario. Lista de eventos, programación o sessiones"
+    description = "Information content about my agenda: list of your events,\
+     your schedule or your sessions."
     args_schema: Type[BaseModel] = SearchInput
     llm: BaseLanguageModel
+    token: str
 
-    def __init__(self, llm: BaseLanguageModel ): 
-        super(getAgenda, self).__init__(llm=llm)
+    def __init__(self, llm: BaseLanguageModel, token: str ): 
+        super(getAgenda, self).__init__(llm=llm,token =  token)
          
 
 
@@ -41,9 +43,10 @@ class getAgenda(BaseTool):
         self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
     ) -> str:
         """Use the tool."""
+        print('getAgenda')
         #print('getCalendarInfo getCalendarInfo getCalendarInfo getCalendarInfo') 
-        url = 'https://dev2.lya2.com/lya2git/index01.php?pag=300&tabs=1&alias=0&rest=D&action=calendarlist&tipo=month&fecha=2024-02-19tipo=DAY'
-        r = requests.get(url, headers={'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvZGV2Mi5seWEyLmNvbSIsImF1ZCI6Imh0dHBzOlwvXC9kZXYyLmx5YTIuY29tIiwiaWF0IjoxNzA4MzY3Nzk5LCJleHAiOjMyODUxNjc3OTksImRhdGEiOnsidWlkIjoiMTMiLCJiZCI6ImVtcHJlc2EiLCJpZF9jZW50cm8iOiIyIiwidXN1YXJpbyI6InNvbGVyIiwiaWRfYmRkIjoiMSIsImFjY2VzbyI6IjIiLCJ6b25hIjpudWxsLCJ1dWlkIjoiIn19.jRx6ubaiWK-YCX2m9XjfB-fwvgwt6mPWRyB4RLndY3g'})
+        url = 'https://dev2.lya2.com/lya2git/index01.php?pag=300&tabs=1&alias=0&rest=D&action=calendarlist&fecha=2024-02-27'
+        r = requests.get(url, headers={'Authorization': self.token })
         data = r.json() 
         json_schema =  data['data']['rows']
         #print(json_schema)
@@ -71,12 +74,7 @@ class getAgenda(BaseTool):
             llm = self.llm, 
             prompt = prompt, 
             verbose=False 
-        )
- 
-
-        #output = chain.invoke({"json": json.dumps(json_schema)}) 
-
-         
+        ) 
 
         output  = chain.invoke({"question": json_schema})
 

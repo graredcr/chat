@@ -30,9 +30,10 @@ from langchain.prompts import MessagesPlaceholder
 
 def _make_llm(model, temp, api_key, callbacks, streaming: bool = False):
     llm = ChatOpenAI(
-            temperature=temp,
-            #model_name=model,
+            temperature=temp, 
+            model_name= model,
             request_timeout=1000,
+            #max_tokens=1000,
             streaming=False, #si true excribe mientras encuentra resultados
             #callbacks=[StreamingStdOutCallbackHandler()],
             callbacks = callbacks,
@@ -48,7 +49,9 @@ class lya2Agent:
         callbacks=[StreamingStdOutCallbackHandler()], 
         tools=None,
         model="gpt-3.5-turbo-0125",
+        #model="gpt-4",
         tools_model="gpt-3.5-turbo-0125",
+        #tools_model="gpt-4",
         temp=0.0,
         context='', 
         max_iterations=2,
@@ -61,8 +64,7 @@ class lya2Agent:
         """Initialize ChemCrow agent."""
 
         load_dotenv()
-
-        self.token = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvZGV2Mi5seWEyLmNvbSIsImF1ZCI6Imh0dHBzOlwvXC9kZXYyLmx5YTIuY29tIiwiaWF0IjoxNzA4OTYxMjcyLCJleHAiOjMyODU3NjEyNzIsImRhdGEiOnsidWlkIjoiMzc2IiwiYmQiOiJlbXByZXNhIiwiaWRfY2VudHJvIjoiMiIsInVzdWFyaW8iOiJhZGFsaWEiLCJpZF9iZGQiOiIxIiwiYWNjZXNvIjoiMSIsInpvbmEiOm51bGwsInV1aWQiOiIifX0.OIdg4pDIs88UtP5fl-bgmg2DxD2UwI5kEoxmjysvbbo'
+        self.token = token
         """try: 
             self.llm = _make_llm(model, temp, openai_api_key, streaming)
         except ValidationError:
@@ -73,10 +75,11 @@ class lya2Agent:
         
         api_keys['OPENAI_API_KEY'] = openai_api_key
         llm         = _make_llm(model, temp, openai_api_key, callbacks,  stream)
-        tools_llm   = _make_llm(tools_model, temp, openai_api_key, callbacks, stream)
+        tools_llm   = _make_llm(model, temp, openai_api_key, callbacks, stream)
         tools = make_tools(
             llm,
             api_keys = api_keys,
+            token = self.token,
             verbose=False
         )
         tools_llm = tools_llm.bind_tools(tools)
@@ -87,7 +90,10 @@ class lya2Agent:
             [
                 (
                     "system",
-                    "You are very powerful assistant, select the best tool and return the answer. If not have a good answer, we can list de description tools.  Your answer by default are in spanish language and a good explanation by steps for the actions. ",
+                    "You are very powerful assistant, select the best tool and return the answer.\
+                    If not have a good answer, we can list de description tools.\
+                    Your answer by default are in spanish language and a good explanation by steps for the actions.\
+                    For personal questions no use tools, and only can show the name",
                 ),
                 MessagesPlaceholder(variable_name="chat_history"),
                 MessagesPlaceholder(variable_name="context"),

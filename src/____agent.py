@@ -54,11 +54,11 @@ def getAuthInfo( token):
 #CHAT history
 chat_history = []  
 chat_history.extend(
-            [
-                HumanMessage('Me llamo '+name),
-                AIMessage('Hola como estas'),
-            ]
-        ) 
+    [
+        HumanMessage('Me llamo '+name),
+        AIMessage('Hola como estas'),
+    ]
+) 
 
 agent = lya2Agent(  
     temp=0.0,
