@@ -28,26 +28,29 @@ os.environ['HUGGINGFACEHUB_API_TOKEN']  = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
 token                                   = st.secrets["TOKEN"]
 
 def createBdd():
-    if os.path.isdir('./vectorBDD'):
-        shutil.rmtree('./vectorBDD')
+    print('createBdd')
+    if not os.path.isdir('./vectorBDD'):
+        print('createBdd start')
+        loader          = PyPDFLoader("./data/manual_usuario.pdf")
+        documents       = loader.load()
 
-    loader          = PyPDFLoader("./data/manual_usuario.pdf")
-    documents       = loader.load()
+        # split it into chunks
+        text_splitter = CharacterTextSplitter(chunk_size=5500, chunk_overlap=200)
+        docs = text_splitter.split_documents(documents)
 
-    # split it into chunks
-    text_splitter = CharacterTextSplitter(chunk_size=5500, chunk_overlap=200)
-    docs = text_splitter.split_documents(documents)
+        embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2") 
 
-    embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2") 
+        #db = FAISS.from_documents(docs, embedding_function, persist_directory = persist_directory)
+        faiss = FAISS.from_documents(docs, embedding_function)
 
-    #db = FAISS.from_documents(docs, embedding_function, persist_directory = persist_directory)
-    faiss = FAISS.from_documents(docs, embedding_function)
-
-    faiss.save_local("./vectorBDD", "manual_usuario")
+        faiss.save_local("./vectorBDD", "manual_usuario")
+    else:
+        print('createBdd exist')
 
 
 
 def getAuthInfo( token): 
+    print('getAuthInfo')
     url = 'https://dev2.lya2.com/lya2git/index01.php?pag=93&rest=true'
     auth = requests.get(url, headers={'Authorization': str(token)  })  
      
@@ -75,13 +78,13 @@ def getAuthInfo( token):
     return false
   
 def initHistory(token):
-
+    print('initHistory')
     #get info for context and name
     [context, name] = getAuthInfo(token) 
 
     return [context, name]
 
-
+print('LOAD 1 - initHistory')
 [context, name] = initHistory(token)
 
 #CHAT history
@@ -92,6 +95,7 @@ chat_history.extend(
         AIMessage('Hola como estas'),
     ]
 ) 
+ 
 
 st_callback = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
 agent = lya2Agent(  
@@ -102,7 +106,7 @@ agent = lya2Agent(
     stream=False
 ).agent_executor
 
-
+print('LOAD 2 -- CREATE BDD')
 createBdd()
 
 st.title("Lya2 chat")
@@ -122,44 +126,23 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 
-
-# Accept user input
-if prompt := st.chat_input("What is up?"):
-    # Display user message in chat message container
-    with st.chat_message("user"):
-        st.spinner('Wait for it...')
-        st.markdown(prompt)
-        chat_history.extend(
-            [
-                HumanMessage(content=prompt), 
-                #AIMessage(content=response["output"]),
-            ]
-        )
-
-    st.session_state.messages.append({"role": "user", "content": prompt})
-
-
-    with st.chat_message("assistant"):
-        st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
+prompt = st.chat_input("Say something")
+if prompt:   
+    with st.chat_message("user"): 
+        st.markdown(prompt) 
+        st.session_state.messages.append({"role": "user", "content": prompt})
         with st.spinner("waiting"): 
             response    = agent.invoke({"input": prompt, "chat_history": chat_history  } ) 
+
+    with st.chat_message("assistant"):
         st.session_state.messages.append({"role": "assistant", "content": response["output"]})
         st.write(response["output"]) 
         chat_history.extend(
             [ 
+                HumanMessage(content=prompt), 
                 AIMessage(content=response["output"]),
             ]
         )
-
- 
-    #response = agent.invoke({"input": prompt, "chat_history": chat_history})
-    #st.session_state.messages.append({"role": "assistant", "content": response["output"] })
-    #st.markdown(response["output"])
-    
-    #stream          = st.write_stream(response["output"] )
-
-
-
     
  
 
