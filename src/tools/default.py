@@ -25,70 +25,7 @@ from typing import Any
 
 class SearchInput(BaseModel):
     query: str = Field(description="should be a search query") 
-
-class getAgenda(BaseTool):
-    name = "getAgenda"
-    description = "Information content about my agenda: list of your events,\
-     your schedule or your sessions."
-    args_schema: Type[BaseModel] = SearchInput
-    llm: BaseLanguageModel
-    token: str
-
-    def __init__(self, llm: BaseLanguageModel, token: str ): 
-        super(getAgenda, self).__init__(llm=llm,token =  token)
-         
-
-
-    def _run(
-        self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
-    ) -> str:
-        """Use the tool."""
-        print('getAgenda')
-        #print('getCalendarInfo getCalendarInfo getCalendarInfo getCalendarInfo') 
-        url = 'https://dev2.lya2.com/lya2git/index01.php?pag=300&tabs=1&alias=0&rest=D&action=calendarlist&fecha=2024-02-27'
-        r = requests.get(url, headers={'Authorization': self.token })
-        data = r.json() 
-        json_schema =  data['data']['rows']
-        #print(json_schema)
-        #Format the JSON schema into a string representation 
-        json_schema_str = json.dumps(json_schema)
-        #data = f"Esquema JSON de los eventos. :"+json_schema_str+" type:3 son tareas, type:4 vacaciones o permisos. "
-      
-        #foormatear información
-        template = """devolver el listado eventos con el siguiente formato:
-
-        - Nombre evento
-        - descripción
-        - Fecha
-        - Hora
-        - Lugar
-  \
-        """
-        prompt = PromptTemplate(
-            template=template,
-            input_variables=["question"],
-        )
- 
-        #CHAINS ***********
-        chain = LLMChain(
-            llm = self.llm, 
-            prompt = prompt, 
-            verbose=False 
-        ) 
-
-        output  = chain.invoke({"question": json_schema})
-
-        return output 
-        
-
-    async def _arun(
-        self, query: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
-    ) -> str:
-        """Use the tool asynchronously."""
-        raise NotImplementedError("custom_search does not support async")
-
-    
-
+  
 class defaultTool(BaseTool):
     name = "defaultTool"
     description = "default tool for those questions for which no tool has been found"

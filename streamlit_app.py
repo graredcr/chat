@@ -25,7 +25,7 @@ from langchain_community.vectorstores import FAISS
 
 os.environ['OPENAI_API_KEY']            = st.secrets["OPENAI_API_KEY"] 
 os.environ['HUGGINGFACEHUB_API_TOKEN']  = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
-token                                   = st.secrets["TOKEN"]
+#token                                   = st.secrets["TOKEN"]
 
 def createBdd():
     print('createBdd')
@@ -70,12 +70,11 @@ def getAuthInfo( token):
         context.append("Identificador de usuario "+data['data']['0']['id_personal'] )
         context.append("Identificador de sylbo "+data['data']['0']['id_sylbo'] )
         
-        
-       
+
         
         return [context, name] 
      
-    return false
+    
   
 def initHistory(token):
     print('initHistory')
@@ -84,66 +83,89 @@ def initHistory(token):
 
     return [context, name]
 
-print('LOAD 1 - initHistory')
-[context, name] = initHistory(token)
+def init(token):
+    print('LOAD 1 - initHistory')
 
-#CHAT history
-chat_history = []  
-chat_history.extend(
-    [
-        HumanMessage('Me llamo '+name),
-        AIMessage('Hola como estas'),
-    ]
-) 
- 
+    [context, name] = initHistory(token)
 
-st_callback = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
-agent = lya2Agent(  
-    temp=0.0,
-    context = context,
-    token = token,
-    #callbacks = [st_callback],
-    stream=False
-).agent_executor
-
-print('LOAD 2 -- CREATE BDD')
-createBdd()
-
-st.title("Lya2 chat")
-
-# Set a default model
-if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-3.5-turbo"
-
-# Initialize chat history
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
- 
-# Display chat messages from history on app rerun
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-
-prompt = st.chat_input("Say something")
-if prompt:   
-    with st.chat_message("user"): 
-        st.markdown(prompt) 
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.spinner("waiting"): 
-            response    = agent.invoke({"input": prompt, "chat_history": chat_history  } ) 
-
-    with st.chat_message("assistant"):
-        st.session_state.messages.append({"role": "assistant", "content": response["output"]})
-        st.write(response["output"]) 
-        chat_history.extend(
-            [ 
-                HumanMessage(content=prompt), 
-                AIMessage(content=response["output"]),
-            ]
-        )
+    #CHAT history
+        
+    chat_history.extend(
+        [
+            HumanMessage('Me llamo '+name),
+            AIMessage('Hola como estas'),
+        ]
+    ) 
     
- 
 
+    st_callback = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
+    agent = lya2Agent(  
+        temp=0.0,
+        context = context,
+        token = token,
+        #callbacks = [st_callback],
+        stream=False
+    ).agent_executor
+
+    #st.session_state["agent"] = agent 
+
+    print('LOAD 2 -- CREATE BDD')
+    createBdd()
+
+    st.title("Lya2 chat")
+
+    return agent
+
+chat_history = [] 
+context = ''
+agent = ''
+
+token_input = st.text_input('TOKEN', '')  
+if token_input:
+    print('if input token_input change')
+    if "token_input" not in st.session_state: 
+        st.session_state["token_input"] = token_input 
+        token = "Bearer "+token_input
+        
+        
+    else:
+        st.session_state["token_input"] = token_input 
+        token = "Bearer "+token_input
+    
+    agent = init(token)
+
+    prompt = st.chat_input("Say something")
+    if prompt: 
+        print('LOAD   - promptpromptprompt') 
+
+        # Set a default model
+        if "openai_model" not in st.session_state:
+            st.session_state["openai_model"] = "gpt-3.5-turbo"
+
+        # Initialize chat history
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
+        
+        # Display chat messages from history on app rerun
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"]) 
+       
+        with st.chat_message("user"): 
+            st.markdown(prompt) 
+            st.session_state.messages.append({"role": "user", "content": prompt}) 
+
+            with st.spinner("waiting"): 
+                response    = agent.invoke({"input": prompt, "chat_history": chat_history  } ) 
+
+        with st.chat_message("assistant"):
+            st.session_state.messages.append({"role": "assistant", "content": response["output"]})
+            st.write(response["output"]) 
+            chat_history.extend(
+                [ 
+                    HumanMessage(content=prompt), 
+                    AIMessage(content=response["output"]),
+                ]
+            )
         

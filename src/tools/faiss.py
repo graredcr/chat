@@ -16,7 +16,7 @@ from langchain.base_language import BaseLanguageModel
 from langchain_community.embeddings import SentenceTransformerEmbeddings
 
   
-#from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 
 
 class SearchInput(BaseModel):
@@ -25,15 +25,31 @@ class SearchInput(BaseModel):
 
 class faissSeach(BaseTool):
     name = "faissSeach"
-    description = "Userful when the user needs steps for make something related of lya2 product  or sylbo product.\
+    description = "Userful when the user needs steps for make something related of lya2 product  or sylbo product. \
+     - Description home \
+     - Lya2 Intern messages \
+     - Sylbo messages \
+     - My claendar description \
+     - Events \
+     - Show/Hide Sections Button\
+     - General Calendar \
+     - Permission or vacation\
+     - Cahnges \
+     - simple change \
+     - Double change \
+     - Substitution \
+     - Session \
+     - daily program \
+     - weekly program \
+     - Rastrico \
+     - User and password \
     When the query contains one of following words: Schedules, areas, permits, vacations, peonadas, releases, library, messages\
     you can extract images and add ths images to anwer."
     args_schema: Type[BaseModel] = SearchInput
 
     def __init__(self, llm: BaseLanguageModel ):
         super(faissSeach, self).__init__(llm=llm)
-
-
+ 
     def _run(
         self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
     ) -> str:
@@ -46,7 +62,7 @@ class faissSeach(BaseTool):
         embeddings      = OpenAIEmbeddings()
         db              = FAISS.from_documents(docs, embeddings)""" 
         embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-        db = faiss.load_local("./vectorBDD",embedding_function, "manual_usuario")
+        db = FAISS.load_local("./vectorBDD",embedding_function, "manual_usuario")
 
 
 

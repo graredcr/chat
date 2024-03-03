@@ -16,6 +16,7 @@ from typing import Optional
  
 from src.maketools import make_tools
 
+from openai import OpenAI  
 from langchain_openai import ChatOpenAI  
 from langchain.chains import LLMChain 
 
@@ -40,6 +41,12 @@ def _make_llm(model, temp, api_key, callbacks, streaming: bool = False):
             openai_api_key = api_key,
             verbose = False,
             )
+
+    client = OpenAI(
+        api_key = "LL-lefDUa3nq712SSWUDygNaYB5pzPxi5RItZJiDcD9JTPEF8jupxdbHK05IM55V8Gl",
+        base_url = "https://api.llama-api.com"
+        )
+
     return llm
 
 class lya2Agent:
@@ -48,10 +55,10 @@ class lya2Agent:
         token,
         callbacks=[StreamingStdOutCallbackHandler()], 
         tools=None,
-        model="gpt-3.5-turbo-0125",
-        #model="gpt-4",
-        tools_model="gpt-3.5-turbo-0125",
-        #tools_model="gpt-4",
+        #model="gpt-3.5-turbo-0125",
+        model="gpt-4",
+        #tools_model="gpt-3.5-turbo-0125",
+        tools_model="gpt-4",
         temp=0.0,
         context='', 
         max_iterations=2,
@@ -83,17 +90,19 @@ class lya2Agent:
             verbose=False
         )
         tools_llm = tools_llm.bind_tools(tools)
- 
+  
 
-         
+        
         prompt = ChatPromptTemplate.from_messages(
             [
                 (
                     "system",
-                    "You are very powerful assistant, select the best tool and return the answer.\
+                    "You are very powerful assistant. \
+                    Use the tools provided, using the most specific tool available for each action.\
+                    Your final answer should contain all information necessary to answer the question and subquestions.\
                     If not have a good answer, we can list de description tools.\
                     Your answer by default are in spanish language and a good explanation by steps for the actions.\
-                    For personal questions no use tools, and only can show the name",
+                    For personal questions no use tools, and only can show the name. If you detect date or you can deduce it from user query, you should write it in the answer with format DD/MM/YYYY. ",
                 ),
                 MessagesPlaceholder(variable_name="chat_history"),
                 MessagesPlaceholder(variable_name="context"),
