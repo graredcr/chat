@@ -1,0 +1,6 @@
+;;
+Configuración Puentes;https://s3-eu-central-1.amazonaws.com/euc-cdn.freshdesk.com/data/helpdesk/attachments/production/101073027668/original/FxXZgeRj8_J2BHruorN1aCNHhHuPjsVfxQ.png?1680448642;"En la imagen superior dos conceptos:
+Puentes P : Indica el número de días en que el profesional tiene programación en días configurados como puentes
+Puentes Afectados PA : Indica el número de puentes en que el profesional tiene programada alguna actividad.
+"
+Configuración festivos;https://s3-eu-central-1.amazonaws.com/euc-cdn.freshdesk.com/data/helpdesk/attachments/production/101001829269/original/JtwA3SSdtzV6Anz5IXnn1-uzFEo3YzKJiA.png?1640108581;Al establecer un área como día de festivo, en general se cierran áeas de programación, adoptando la configuración estandar de los domingos. Te avisa si cierra areas de actividad que ya estan programadas.

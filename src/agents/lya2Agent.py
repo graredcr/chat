@@ -64,7 +64,7 @@ class lya2Agent:
         #tools_model="gpt-4",
         temp=0.0,
         context='', 
-        max_iterations=2,
+        max_iterations=3,
         verbose=False,
         stream: bool = False,
         openai_api_key: Optional[str] = None,
@@ -108,7 +108,9 @@ class lya2Agent:
                     Your answer by default are in spanish language and a good explanation by steps for the actions.\
                     For personal questions no use tools, and only can show the name. If you detect date or you can deduce it from user query, you should write it in the answer with format DD/MM/YYYY.\
                      \
-                    If the user question your function, you can describe the tools list. ",
+                    If the user question your function, you can describe the tools list. \
+                    Only you can use one tool for query. \
+                    If no tool works to answer the query, do not use any",
                 ),
                 MessagesPlaceholder(variable_name="chat_history"),
                 MessagesPlaceholder(variable_name="context"),
@@ -131,7 +133,7 @@ class lya2Agent:
             | OpenAIToolsAgentOutputParser() 
             #| StrOutputParser()
         )  
-        self.agent_executor  = AgentExecutor(agent=agent, tools=tools,  verbose=False )  
+        self.agent_executor  = AgentExecutor(agent=agent, tools=tools,  verbose=False, max_iterations=max_iterations )  
 
     
         
