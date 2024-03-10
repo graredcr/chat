@@ -11,6 +11,8 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.agents import Tool  
 from langchain.agents import AgentExecutor, create_structured_chat_agent, ZeroShotAgent
 
+from langchain_community.llms import HuggingFaceHub
+
 from dotenv import load_dotenv
 from typing import Optional
  
@@ -41,11 +43,10 @@ def _make_llm(model, temp, api_key, callbacks, streaming: bool = False):
             openai_api_key = api_key,
             verbose = False,
             )
+     
 
-    client = OpenAI(
-        api_key = "LL-lefDUa3nq712SSWUDygNaYB5pzPxi5RItZJiDcD9JTPEF8jupxdbHK05IM55V8Gl",
-        base_url = "https://api.llama-api.com"
-        )
+    #llm = HuggingFaceHub(repo_id= 'google/flan-t5-xl', bind_tools={"temperature":0, "max_length":512})
+ 
 
     return llm
 
@@ -53,12 +54,14 @@ class lya2Agent:
     def __init__(
         self,
         token,
+        nivel,
         callbacks=[StreamingStdOutCallbackHandler()], 
         tools=None,
-        #model="gpt-3.5-turbo-0125",
-        model="gpt-4",
-        #tools_model="gpt-3.5-turbo-0125",
-        tools_model="gpt-4",
+        #model="llama-13b-chat"
+        model="gpt-3.5-turbo-0125",
+        #model="gpt-4", 
+        tools_model="gpt-3.5-turbo-0125",
+        #tools_model="gpt-4",
         temp=0.0,
         context='', 
         max_iterations=2,
@@ -87,6 +90,7 @@ class lya2Agent:
             llm,
             api_keys = api_keys,
             token = self.token,
+            nivel = nivel,
             verbose=False
         )
         tools_llm = tools_llm.bind_tools(tools)
@@ -97,12 +101,14 @@ class lya2Agent:
             [
                 (
                     "system",
-                    "You are very powerful assistant. \
+                    "You are very powerful assistant.\
                     Use the tools provided, using the most specific tool available for each action.\
                     Your final answer should contain all information necessary to answer the question and subquestions.\
                     If not have a good answer, we can list de description tools.\
                     Your answer by default are in spanish language and a good explanation by steps for the actions.\
-                    For personal questions no use tools, and only can show the name. If you detect date or you can deduce it from user query, you should write it in the answer with format DD/MM/YYYY. ",
+                    For personal questions no use tools, and only can show the name. If you detect date or you can deduce it from user query, you should write it in the answer with format DD/MM/YYYY.\
+                     \
+                    If the user question your function, you can describe the tools list. ",
                 ),
                 MessagesPlaceholder(variable_name="chat_history"),
                 MessagesPlaceholder(variable_name="context"),
@@ -117,14 +123,15 @@ class lya2Agent:
                 "chat_history": lambda x: x["chat_history"], 
                 "context": lambda x: context, 
                 "agent_scratchpad": lambda x: format_to_openai_tool_messages(
-                    x["intermediate_steps"]
+                   x["intermediate_steps"]
                 ),
             }
             | prompt
             | tools_llm
             | OpenAIToolsAgentOutputParser() 
-        ) 
-        self.agent_executor  = AgentExecutor(agent=agent, tools=tools,  verbose=False)  
+            #| StrOutputParser()
+        )  
+        self.agent_executor  = AgentExecutor(agent=agent, tools=tools,  verbose=False )  
 
     
         

@@ -31,7 +31,7 @@ class defaultTool(BaseTool):
     description = "default tool for those questions for which no tool has been found"
     args_schema: Type[BaseModel] = SearchInput
 
-    def __init__(self, llm: BaseLanguageModel ):
+    def __init__(self, llm: BaseLanguageModel, nivel: str ):
         super(defaultTool, self).__init__(llm=llm)
 
 

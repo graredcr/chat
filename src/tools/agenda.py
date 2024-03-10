@@ -70,44 +70,9 @@ class getAgenda(BaseTool):
             many=False,
         )
 
-        chain = create_extraction_chain(self.llm, schema, encoder_or_encoder_class='json')
-
-        #print('getCalendarInfo getCalendarInfo getCalendarInfo getCalendarInfo') 
-        #url = 'https://dev2.lya2.com/lya2git/index01.php?pag=300&tabs=1&alias=0&rest=D&action=calendarlist&fecha=2024-02-27'
-        #r = requests.get(url, headers={'Authorization': self.token })
-        #data = r.json() 
-        #json_schema =  data['data']['rows']
-        #print(json_schema)
-        #Format the JSON schema into a string representation 
-        #json_schema_str = json.dumps(json_schema)
-        #data = f"Esquema JSON de los eventos. :"+json_schema_str+" type:3 son tareas, type:4 vacaciones o permisos. "
-      
-        #foormatear información
-        #template = """return the event list with the follow format: 
-         #- Date and time if exist
-         #- Name
-         #- Description
-         #- Place
-
-         #And finaly the date o range of date detecte in query.
-   #\
-        # """ 
-        #template = """Subtraction of dates in "{query}". Format of output: DD/MM/YYYY """
-        #prompt = PromptTemplate(
-        #    template=template,
-        #    input_variables=["query"]
-        #)
-
-        
- 
-        #CHAINS ***********
-        #chain = LLMChain(
-        #    llm = self.llm, 
-        #    prompt = prompt, 
-        #    verbose=True 
-        #)  
-         
+        chain = create_extraction_chain(self.llm, schema, encoder_or_encoder_class='json')  
         output  = chain.invoke( query+" (hoy es "+d1+")" ) 
+        
         #de momento cogemos solo la primera fecha
         fecha = output['text']['data']['dates']['date'][0]
 

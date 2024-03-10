@@ -17,43 +17,27 @@ class SearchInput(BaseModel):
     query: str = Field(description="should be a search query") 
   
 
-class faissSeach(BaseTool):
-    name = "faissSeach"
-    description = "Userful when the user needs steps for make something related of lya2 product  or sylbo product. \
+class faissAdministratorSearch(BaseTool):
+    name = "faissAdministratorSearch"
+    description = "Userful when the user needs steps for make something related of lya2 administratotion \
      - Description home \
-     - Lya2 Intern messages \
-     - Sylbo messages \
-     - My claendar description \
-     - Events \
-     - Show/Hide Sections Button\
-     - General Calendar \
-     - Permission or vacation\
-     - Cahnges \
-     - simple change \
-     - Double change \
-     - Substitution \
-     - Session \
-     - daily program \
-     - weekly program \
-     - Rastrico \
-     - User and password \
-     - lya2 calendar synchronization \
-    When the query contains one of following words: Schedules, areas, permits, vacations, peonadas, releases, library, messages\
+     - Holidays or permission configuration  \
+    \
     you can extract images and add ths images to anwer."
     args_schema: Type[BaseModel] = SearchInput
-    nivel: str
+    nivel: str 
 
     def __init__(self, llm: BaseLanguageModel , nivel: str):
-        super(faissSeach, self).__init__(llm=llm , nivel=nivel)
+        super(faissAdministratorSearch, self).__init__(llm=llm , nivel=nivel)
  
     def _run(
         self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None
     ) -> str:
         """Use the tool."""
-        print("\nfaissSeach") 
+        print(" \n faissAdministratorSearch") 
         embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
         db = FAISS.load_local("./vectorBDD_"+self.nivel,embedding_function, "manual_usuario") 
-        output =  db.similarity_search(query+". Images and links included", 3)
+        output =  db.similarity_search(query, 3)
 
         #print( output)
  
